@@ -16,7 +16,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.text.Collator;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 
 @Api( description="API pour es opérations CRUD sur les produits.")
@@ -47,6 +51,32 @@ public class ProductController {
         return produitsFiltres;
     }
 
+    @ApiOperation(value = "Calculer la marge du produit ayant l'id précisé en paramètre")
+    @GetMapping(value = "/calculerMarge/{id}")
+    public double calculerMargeProduit(@PathVariable int id)
+    {
+        Product prod= productDao.findById(id);
+        return (prod.getPrixAchat()-prod.getPrix());
+    }
+
+    @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant")
+    @GetMapping(value = "/triOrdreAlphabetique/")
+    public List<Product> trierProduitsParOrdreAlphabetique()
+    {
+        List<Product> productList=productDao.findAll();
+        Collator collator= Collator.getInstance(Locale.FRENCH);
+        if(!productList.isEmpty())
+        {
+            Collections.sort(productList, new Comparator<Product>() {
+                @Override
+                public int compare(Product o1, Product o2) {
+                    return collator.compare(o1.getNom(),o2.getNom());
+                }
+            });
+        }
+        return productList;
+    }
+
 
     //Récupérer un produit par son Id
     @ApiOperation(value = "Récupère un produit grâce à son ID à condition que celui-ci soit en stock!")
@@ -69,7 +99,8 @@ public class ProductController {
 
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        Product productAdded =  productDao.save(product);
+        Product productAdded=null;
+        if(product.getPrix()!=0) productDao.save(product);
 
         if (productAdded == null)
             return ResponseEntity.noContent().build();
