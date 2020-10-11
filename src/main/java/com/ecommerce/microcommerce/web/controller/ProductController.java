@@ -75,18 +75,7 @@ public class ProductController {
     @GetMapping(value = "/triOrdreAlphabetique/")
     public List<Product> trierProduitsParOrdreAlphabetique()
     {
-        List<Product> productList=productDao.findAll();
-        Collator collator= Collator.getInstance(Locale.FRENCH);
-        if(!productList.isEmpty())
-        {
-            Collections.sort(productList, new Comparator<Product>() {
-                @Override
-                public int compare(Product o1, Product o2) {
-                    return collator.compare(o1.getNom(),o2.getNom());
-                }
-            });
-        }
-        return productList;
+        return productDao.triAlphabetique();
     }
 
 
