@@ -5,5 +5,5 @@
 .project
 .classpath
 /*/bin
-/*/target
+/target
 /*/.settings

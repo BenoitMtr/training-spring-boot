@@ -47,7 +47,6 @@ public class ProductController {
         MappingJacksonValue produitsFiltres = new MappingJacksonValue(produits);
 
         produitsFiltres.setFilters(listDeNosFiltres);
-
         return produitsFiltres;
     }
 
@@ -56,7 +55,20 @@ public class ProductController {
     public double calculerMargeProduit(@PathVariable int id)
     {
         Product prod= productDao.findById(id);
-        return (prod.getPrixAchat()-prod.getPrix());
+        return (prod.getPrix()-prod.getPrixAchat());
+    }
+
+    @ApiOperation(value = "Calculer la marge de chaque produit présent dans la base")
+    @GetMapping(value = "/AdminProduits/")
+    public String calculerMargeProduit()
+    {
+        String response="";
+        StringBuilder temp = new StringBuilder("");
+        for(Product p:productDao.findAll())
+        {
+            temp.append(p.toString()).append(": ").append(p.getPrix()-p.getPrixAchat()).append(", ");
+        }
+        return temp.toString();
     }
 
     @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant")
