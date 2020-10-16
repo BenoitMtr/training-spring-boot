@@ -32,6 +32,14 @@ public class ProductController {
     @Autowired
     private ProductDao productDao;
 
+    public ProductDao getProductDao() {
+        return productDao;
+    }
+
+    public void setProductDao(ProductDao productDao) {
+        this.productDao = productDao;
+    }
+
 
     //Récupérer la liste des produits
 
@@ -63,7 +71,6 @@ public class ProductController {
     @GetMapping(value = "/AdminProduits/")
     public String calculerMargeProduit()
     {
-        String response="";
         StringBuilder temp = new StringBuilder("");
         for(Product p:productDao.findAll())
         {
