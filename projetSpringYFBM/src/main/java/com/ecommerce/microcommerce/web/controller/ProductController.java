@@ -10,12 +10,23 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.web.ErrorController;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.json.MappingJacksonValue;
+import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.ResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.net.URI;
 import java.text.Collator;
 import java.util.Collections;
@@ -23,11 +34,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import static org.springframework.http.HttpStatus.Series.CLIENT_ERROR;
+import static org.springframework.http.HttpStatus.Series.SERVER_ERROR;
+
 
 @Api( description="API pour es opérations CRUD sur les produits.")
-
 @RestController
-public class ProductController {
+public class ProductController implements ErrorController {
 
     @Autowired
     private ProductDao productDao;
@@ -39,7 +52,6 @@ public class ProductController {
     public void setProductDao(ProductDao productDao) {
         this.productDao = productDao;
     }
-
 
     //Récupérer la liste des produits
 
@@ -80,10 +92,14 @@ public class ProductController {
     }
 
     @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant")
-    @GetMapping(value = "/triOrdreAlphabetique")
-    public List<Product> trierProduitsParOrdreAlphabetique()
+    @GetMapping(value = "/triOrdreAlphabetique/")
+    public MappingJacksonValue trierProduitsParOrdreAlphabetique()
     {
-        return productDao.triAlphabetique();
+        Iterable<Product> sortedProducts=productDao.triAlphabetique();
+
+        MappingJacksonValue produitsFiltres = new MappingJacksonValue(sortedProducts);
+
+        return produitsFiltres;
     }
 
 
@@ -105,18 +121,15 @@ public class ProductController {
 
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        Product productAdded=null;
         if(product.getPrixAchat()==0) throw new ProduitGratuitException("Le prix de vente doit être supérieur à 0");
 
-        productDao.save(product);
-
-        if (productAdded == null)
-            return ResponseEntity.noContent().build();
+        if(product!=null) productDao.save(product);
+        else return ResponseEntity.noContent().build();
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(productAdded.getId())
+                .buildAndExpand(product.getId())
                 .toUri();
 
         return ResponseEntity.created(location).build();
@@ -141,6 +154,28 @@ public class ProductController {
         return productDao.chercherUnProduitCher(400);
     }
 
+   @RequestMapping(value = "/error", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT})
+    public String renderErrorPage(HttpServletRequest request) {
+        Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
+        return "Erreur "+ statusCode+": "+getErrorMessage(statusCode);
+    }
 
+    public String getErrorMessage(int HTTPCode)
+    {
+        switch(HTTPCode)
+        {
+            case 400: return "Il y a une erreur dans la requête";
+            case 401: return "Une autorisation est nécessaire pour accéder à la requête";
+            case 403: return "Droits d'accès insuffisants";
+            case 404: return "La ressource est introuvable";
+            case 500: return "Ah, le serveur a rencontré un problème!";
+            case 502: return "Un serveur en amont nous a envoyé une réponse invalide";
+        }
+        return "";
+    }
 
+    @Override
+    public String getErrorPath() {
+        return "/error";
+    }
 }

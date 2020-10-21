@@ -3,7 +3,6 @@ package com.ecommerce.microcommerce;
 import com.ecommerce.microcommerce.dao.ProductDao;
 import com.ecommerce.microcommerce.model.Product;
 import com.ecommerce.microcommerce.web.controller.ProductController;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,7 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.List;
+import javax.servlet.http.HttpServletRequest;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -35,10 +38,12 @@ public class MicrocommerceApplicationTests {
 	@Test
 	public void calculerMargeProduit() {
 		/*pController=new ProductController();
-		Product p=new Product(1, "test", 50, 30);
-		pController.ajouterProduit(p);
+		productDao=mock(ProductDao.class);
 
-		Assert.assertEquals(20,pController.calculerMargeProduit(1));*/
+		Product p=new Product(5, "test", 50, 30);
+		when(productDao.findById(p.getId())).thenReturn(p);
+
+		assertEquals(20,pController.calculerMargeProduit(5));*/
 	}
 
 	@Test
@@ -81,4 +86,18 @@ public class MicrocommerceApplicationTests {
 	public void updateProduit() {
 	}
 
+	@Test
+	public void renderErrorPage()
+	{
+		pController=new ProductController();
+		HttpServletRequest request = mock(HttpServletRequest.class);
+		when((Integer) request.getAttribute("javax.servlet.error.status_code")).thenReturn(400);
+
+		assertEquals("Erreur 400: "+pController.getErrorMessage(400), pController.renderErrorPage(request));
+
+		when((Integer) request.getAttribute("javax.servlet.error.status_code")).thenReturn(500);
+
+		assertEquals("Erreur 500: "+pController.getErrorMessage(500), pController.renderErrorPage(request));
+
+	}
 }
