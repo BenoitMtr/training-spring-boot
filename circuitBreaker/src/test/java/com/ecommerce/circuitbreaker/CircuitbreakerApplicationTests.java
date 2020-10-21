@@ -1,4 +1,4 @@
-package com.example.circuitbreaker;
+package com.ecommerce.circuitbreaker;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
