@@ -68,7 +68,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "Calculer la marge de chaque produit présent dans la base")
-    @GetMapping(value = "/AdminProduits/")
+    @GetMapping(value = "/AdminProduits")
     public String calculerMargeProduit()
     {
         StringBuilder temp = new StringBuilder("");
@@ -80,7 +80,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant")
-    @GetMapping(value = "/triOrdreAlphabetique/")
+    @GetMapping(value = "/triOrdreAlphabetique")
     public List<Product> trierProduitsParOrdreAlphabetique()
     {
         return productDao.triAlphabetique();
@@ -99,9 +99,6 @@ public class ProductController {
 
         return produit;
     }
-
-
-
 
     //ajouter un produit
     @PostMapping(value = "/Produits")
@@ -136,7 +133,6 @@ public class ProductController {
 
         productDao.save(product);
     }
-
 
     //Pour les tests
     @GetMapping(value = "test/produits/{prix}")
