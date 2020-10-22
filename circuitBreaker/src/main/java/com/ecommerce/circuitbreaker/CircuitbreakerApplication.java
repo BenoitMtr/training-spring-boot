@@ -1,6 +1,9 @@
 package com.ecommerce.circuitbreaker;
 
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,13 +32,32 @@ public class CircuitbreakerApplication {
     public RestTemplate template(){
         return new RestTemplate();
     }
+
+
+    @ApiOperation(value = "Obtenir la liste des produits", response = Iterable.class, tags = "listProductNow")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="Page Introuvable")
+    })
+
     @HystrixCommand(groupKey = "java yan", commandKey = "java yan", fallbackMethod = "listProductMyShowFallBack")
-    @RequestMapping("/listProductNow")
+    @RequestMapping(value = "/listProductNow",method = RequestMethod.GET)
     public String listProductShow(){
         String listProductServiceResponse = template.getForObject("http://localhost:9090/Produits",String.class);
         return listProductServiceResponse;
     }
 
+    @ApiOperation(value = "Obtenir la marge d'un produit", response = Iterable.class, tags = "calculerMargeProduitNow")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="Page Introuvable")
+    })
     @HystrixCommand(groupKey = "java yan", commandKey = "java yan", fallbackMethod = "callMargeProductServiceAndGetData_Fallback")
     @RequestMapping(value = "/calculerMargeProduitNow/{id}", method = RequestMethod.GET)
     public String calculerMargeProduitShow(@PathVariable String id){
@@ -52,6 +74,14 @@ public class CircuitbreakerApplication {
         return response;
     }
 
+    @ApiOperation(value = "Calculer la marge de chaque produit présent dans la base", response = Iterable.class, tags = "AdminMargeProduitNow")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
     @HystrixCommand(groupKey = "java yan", commandKey = "java yan", fallbackMethod = "listProductMyShowFallBack")
     @RequestMapping(value = "/AdminMargeProduitNow",method = RequestMethod.GET)
     public String calculerMargeProduit()
@@ -60,6 +90,14 @@ public class CircuitbreakerApplication {
         return calculerMargeProduitResponse;
     }
 
+    @ApiOperation(value = "Obtenir la liste des produits dans l'ordre alphabétique", response = Iterable.class, tags = "triOrdreAlphabetiqueNow")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
     @HystrixCommand(groupKey = "java yan", commandKey = "java yan", fallbackMethod = "listProductMyShowFallBack")
     @RequestMapping(value = "/triOrdreAlphabetiqueNow", method = RequestMethod.GET)
     public String trierProduitsParOrdreAlphabetiqueShow(){
@@ -67,6 +105,14 @@ public class CircuitbreakerApplication {
         return trierProduitsParOrdreAlphabetique;
     }
 
+    @ApiOperation(value = "Obtenir un produit à partir d'un ID", response = Iterable.class, tags = "afficherUnProduitNow")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
     @HystrixCommand(groupKey = "java yan", commandKey = "java yan", fallbackMethod = "callAfficherProduitServiceAndGetData_Fallback")
     @RequestMapping(value = "/afficherUnProduitNow/{id}" ,method = RequestMethod.GET)
     public String afficherUnProduitShow(@PathVariable String id){

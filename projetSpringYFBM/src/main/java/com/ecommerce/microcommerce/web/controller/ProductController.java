@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ErrorController;
 import org.springframework.data.crossstore.ChangeSetPersister;
@@ -38,7 +40,7 @@ import static org.springframework.http.HttpStatus.Series.CLIENT_ERROR;
 import static org.springframework.http.HttpStatus.Series.SERVER_ERROR;
 
 
-@Api( description="API pour es opérations CRUD sur les produits.")
+@Api( description="API pour les opérations CRUD sur les produits.")
 @RestController
 public class ProductController implements ErrorController {
 
@@ -54,9 +56,16 @@ public class ProductController implements ErrorController {
     }
 
     //Récupérer la liste des produits
+    @ApiOperation(value = "Obtenir la liste des produits", response = Iterable.class, tags = "getProducts")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
 
-    @RequestMapping(value = "/Produits", method = RequestMethod.GET)
-
+    @RequestMapping(value = "/getProducts", method = RequestMethod.GET)
     public MappingJacksonValue listeProduits() {
 
         Iterable<Product> produits = productDao.findAll();
@@ -71,7 +80,15 @@ public class ProductController implements ErrorController {
         return produitsFiltres;
     }
 
-    @ApiOperation(value = "Calculer la marge du produit ayant l'id précisé en paramètre")
+    @ApiOperation(value = "Obtenir la marge pour un id de produit", response = Iterable.class, tags = "calculerMarge")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
+
     @GetMapping(value = "/calculerMarge/{id}")
     public double calculerMargeProduit(@PathVariable int id)
     {
@@ -79,7 +96,17 @@ public class ProductController implements ErrorController {
         return (prod.getPrix()-prod.getPrixAchat());
     }
 
-    @ApiOperation(value = "Calculer la marge de chaque produit présent dans la base")
+
+    @ApiOperation(value = "Calculer la marge de chaque produit présent dans la base", response = Iterable.class, tags = "AdminProduits")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
+
+
     @GetMapping(value = "/AdminProduits")
     public String calculerMargeProduit()
     {
@@ -91,8 +118,16 @@ public class ProductController implements ErrorController {
         return temp.toString();
     }
 
-    @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant")
-    @GetMapping(value = "/triOrdreAlphabetique/")
+    @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant", response = Iterable.class, tags = "triOrdreAlphabetique")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
+
+    @GetMapping(value = "/triOrdreAlphabetique")
     public MappingJacksonValue trierProduitsParOrdreAlphabetique()
     {
         Iterable<Product> sortedProducts=productDao.triAlphabetique();
@@ -104,9 +139,17 @@ public class ProductController implements ErrorController {
 
 
     //Récupérer un produit par son Id
-    @ApiOperation(value = "Récupère un produit grâce à son ID à condition que celui-ci soit en stock!")
-    @GetMapping(value = "/Produits/{id}")
+    @ApiOperation(value = "Récupère un produit grâce à son ID et l'affiche", response = Iterable.class, tags = "Produits")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
 
+
+    @GetMapping(value = "/Produits/{id}")
     public Product afficherUnProduit(@PathVariable int id) {
 
         Product produit = productDao.findById(id);
@@ -116,6 +159,15 @@ public class ProductController implements ErrorController {
         return produit;
     }
 
+
+    @ApiOperation(value = "Ajouter un produit", response = Iterable.class, tags = "Produits")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
     //ajouter un produit
     @PostMapping(value = "/Produits")
 
@@ -135,11 +187,29 @@ public class ProductController implements ErrorController {
         return ResponseEntity.created(location).build();
     }
 
+    @ApiOperation(value = "Suppression d'un produit", response = Iterable.class, tags = "Produits")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
+
     @DeleteMapping (value = "/Produits/{id}")
     public void supprimerProduit(@PathVariable int id) {
 
         productDao.delete(id);
     }
+
+    @ApiOperation(value = "Mise à jour d'un produit", response = Iterable.class, tags = "Produits")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
 
     @PutMapping (value = "/Produits")
     public void updateProduit(@RequestBody Product product) {
@@ -147,12 +217,31 @@ public class ProductController implements ErrorController {
         productDao.save(product);
     }
 
+    @ApiOperation(value = "Tests", response = Iterable.class, tags = "test/produits/")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
+
+
     //Pour les tests
     @GetMapping(value = "test/produits/{prix}")
     public List<Product>  testeDeRequetes(@PathVariable int prix) {
 
         return productDao.chercherUnProduitCher(400);
     }
+
+    @ApiOperation(value = "Gestion des erreurs http", response = Iterable.class, tags = "error")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message="Success"),
+            @ApiResponse(code = 500, message="Serveur"),
+            @ApiResponse(code = 401, message="not authorized"),
+            @ApiResponse(code = 403, message="forbidden"),
+            @ApiResponse(code = 404, message="")
+    })
 
    @RequestMapping(value = "/error", method = {RequestMethod.GET, RequestMethod.POST, RequestMethod.DELETE, RequestMethod.PUT})
     public String renderErrorPage(HttpServletRequest request) {

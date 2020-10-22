@@ -1,4 +1,4 @@
-package com.ecommerce.microcommerce.configuration;
+package com.ecommerce.circuitbreaker.configuration;
 
 import com.google.common.base.Predicates;
 import org.springframework.context.annotation.Bean;
