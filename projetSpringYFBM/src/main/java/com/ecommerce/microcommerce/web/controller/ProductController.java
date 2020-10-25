@@ -13,31 +13,16 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.web.ErrorController;
-import org.springframework.data.crossstore.ChangeSetPersister;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.converter.json.MappingJacksonValue;
-import org.springframework.util.ClassUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.ResponseErrorHandler;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.net.URI;
-import java.text.Collator;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-
-import static org.springframework.http.HttpStatus.Series.CLIENT_ERROR;
-import static org.springframework.http.HttpStatus.Series.SERVER_ERROR;
 
 
 @Api( description="API pour les opérations CRUD sur les produits.")
@@ -65,7 +50,7 @@ public class ProductController implements ErrorController {
             @ApiResponse(code = 404, message="")
     })
 
-    @RequestMapping(value = "/getProducts", method = RequestMethod.GET)
+    @RequestMapping(value = "/Produits", method = RequestMethod.GET)
     public MappingJacksonValue listeProduits() {
 
         Iterable<Product> produits = productDao.findAll();
@@ -108,14 +93,14 @@ public class ProductController implements ErrorController {
 
 
     @GetMapping(value = "/AdminProduits")
-    public String calculerMargeProduit()
+    public  HashMap<String, Double> calculerMargeProduit()
     {
-        StringBuilder temp = new StringBuilder("");
+        HashMap<String, Double> listeMarges=new HashMap<>();
         for(Product p:productDao.findAll())
         {
-            temp.append(p.toString()).append(": ").append(p.getPrix()-p.getPrixAchat()).append(", ");
+            listeMarges.put(p.toString(), (double) (p.getPrix()-p.getPrixAchat()));
         }
-        return temp.toString();
+        return listeMarges;
     }
 
     @ApiOperation(value = "Trier la liste des produits par ordre alphabétique français, par nom croissant", response = Iterable.class, tags = "triOrdreAlphabetique")
@@ -173,7 +158,7 @@ public class ProductController implements ErrorController {
 
     public ResponseEntity<Void> ajouterProduit(@Valid @RequestBody Product product) {
 
-        if(product.getPrixAchat()==0) throw new ProduitGratuitException("Le prix de vente doit être supérieur à 0");
+        if(product.getPrix()==0) throw new ProduitGratuitException("Le prix de vente doit être supérieur à 0");
 
         if(product!=null) productDao.save(product);
         else return ResponseEntity.noContent().build();
@@ -257,6 +242,7 @@ public class ProductController implements ErrorController {
             case 401: return "Une autorisation est nécessaire pour accéder à la requête";
             case 403: return "Droits d'accès insuffisants";
             case 404: return "La ressource est introuvable";
+            case 405: return "Endpoint invalide pour la ressource demandée";
             case 500: return "Ah, le serveur a rencontré un problème!";
             case 502: return "Un serveur en amont nous a envoyé une réponse invalide";
         }

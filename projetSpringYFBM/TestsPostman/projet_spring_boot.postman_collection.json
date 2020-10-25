@@ -130,7 +130,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"id\": 10,\r\n    \"nom\": \"produit 2 test\",\r\n    \"prix\": 999,\r\n    \"prixAchat\": 777\r\n}",
+					"raw": "{\r\n    \"id\": 4,\r\n    \"nom\": \"produit 2 test\",\r\n    \"prix\": 999,\r\n    \"prixAchat\": 777\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

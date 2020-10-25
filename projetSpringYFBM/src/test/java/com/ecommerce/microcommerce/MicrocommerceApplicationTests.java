@@ -3,93 +3,108 @@ package com.ecommerce.microcommerce;
 import com.ecommerce.microcommerce.dao.ProductDao;
 import com.ecommerce.microcommerce.model.Product;
 import com.ecommerce.microcommerce.web.controller.ProductController;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-//TODO finish Unit Tests
 public class MicrocommerceApplicationTests {
 
-	@MockBean
+	@Mock
 	ProductDao productDao;
+
+	@InjectMocks
 	ProductController pController;
 
 	@Test
 	public void contextLoads() {
 	}
 
-	@Before
-	public void reset()
-	{
-		productDao.deleteAll();
-	}
-
 	@Test
 	public void calculerMargeProduit() {
-		/*pController=new ProductController();
-		productDao=mock(ProductDao.class);
-
 		Product p=new Product(5, "test", 50, 30);
+		when(productDao.save(p)).thenReturn(p);
 		when(productDao.findById(p.getId())).thenReturn(p);
-
-		assertEquals(20,pController.calculerMargeProduit(5));*/
+        pController.ajouterProduit(p);
+        assertEquals(20,pController.calculerMargeProduit(5),1);
 	}
 
 	@Test
 	public void calculerMargeProduit1() {
-		/*Product p=new Product(2, "test", 50, 30);
-		pController.ajouterProduit(p);
+		Product p=new Product(2, "test", 50, 30);
+		ArrayList<Product> list=new ArrayList<Product>();
+		list.add(p);
+		HashMap<String, Double> margesTest=new HashMap<>();
+		margesTest.put(p.toString(), (double) (p.getPrix()-p.getPrixAchat()));
+		when(productDao.findAll()).thenReturn(list);
 
-		Assert.assertEquals("Product{id="+p.getId()+", nom='"+p.getNom()+"', prix="+p.getPrix()+"}: "+pController.calculerMargeProduit(p.getId())+",",pController.calculerMargeProduit());*/
+		assertThat(pController.calculerMargeProduit(), is(margesTest));
 	}
 
 	@Test
 	public void trierProduitsParOrdreAlphabetique() {
-		/*Product p=new Product(3, "a", 50, 30);
-		Product p2=new Product(4, "b", 50, 30);
-		Product p3=new Product(5, "c", 50, 30);
-
-		pController.ajouterProduit(p);
-		pController.ajouterProduit(p2);
-		pController.ajouterProduit(p3);
-
-		List<Product> sortedList= pController.trierProduitsParOrdreAlphabetique();
-
-		Assert.assertEquals("3", sortedList.get(0).getId());*/
 
 	}
 
 	@Test
 	public void afficherUnProduit() {
+		Product p=new Product(5, "test", 50, 30);
+		when(productDao.findById(p.getId())).thenReturn(p);
+		pController.ajouterProduit(p);
+		assertEquals(p,pController.afficherUnProduit(p.getId()));
+
 	}
 
 	@Test
 	public void ajouterProduit() {
+		Product p=new Product(5, "test", 50, 30);
+		URI location = ServletUriComponentsBuilder
+				.fromCurrentRequest()
+				.path("/{id}")
+				.buildAndExpand(p.getId())
+				.toUri();
+		when(productDao.save(p)).thenReturn(p);
+		assertEquals(ResponseEntity.created(location).build(),pController.ajouterProduit(p));
 	}
 
 	@Test
 	public void supprimerProduit() {
+		Product p=new Product(5, "test", 50, 30);
+		when(productDao.save(p)).thenReturn(p);
+		pController.ajouterProduit(p);
+		doNothing().when(productDao).delete(p);
+		pController.supprimerProduit(p.getId());
 	}
 
 	@Test
 	public void updateProduit() {
+		Product p=new Product(5, "test", 50, 30);
+		when(productDao.save(p)).thenReturn(p);
+		pController.ajouterProduit(p);
+
+		p.setPrix(77);
+		pController.updateProduit(p);
 	}
 
 	@Test
 	public void renderErrorPage()
 	{
-		pController=new ProductController();
 		HttpServletRequest request = mock(HttpServletRequest.class);
 		when((Integer) request.getAttribute("javax.servlet.error.status_code")).thenReturn(400);
 
