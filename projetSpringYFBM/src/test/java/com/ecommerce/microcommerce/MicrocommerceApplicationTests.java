@@ -7,6 +7,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -16,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -59,6 +63,22 @@ public class MicrocommerceApplicationTests {
 
 	@Test
 	public void trierProduitsParOrdreAlphabetique() {
+		Product p=new Product(5, "Ben", 50, 30);
+		Product p2=new Product(6, "Ju", 50, 30);
+		Product p3=new Product(7, "Yan", 50, 30);
+
+		List<Product> listTest=new ArrayList<>(), res=new ArrayList<>();
+		listTest.add(p);
+		listTest.add(p2);
+		listTest.add(p3);
+
+		when(productDao.triAlphabetique()).thenReturn(listTest);
+
+		res= (List<Product>) productDao.triAlphabetique();
+
+		assertEquals(p.getNom(), res.get(0).getNom());
+		assertEquals(p2.getNom(), res.get(1).getNom());
+		assertEquals(p3.getNom(), res.get(2).getNom());
 
 	}
 
