@@ -129,12 +129,12 @@ public class CircuitbreakerApplication {
         return response;
     }
 
-    private String listProductMyShowFallBack()
+    public String listProductMyShowFallBack()
     {
         return "service gateway failed...";
     }
 
-    private String callMargeProductServiceAndGetData_Fallback(String id) {
+    public String callMargeProductServiceAndGetData_Fallback(String id) {
         System.out.println("Product Service is down!!! fallback route enabled...");
         return "CIRCUIT BREAKER ENABLED!!!No Response From Product Service at this moment. Service will be back shortly - " + new Date();
     }
